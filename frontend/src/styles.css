@@ -127,6 +127,7 @@ a:hover { color: var(--gold); }
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+  margin-top: 1rem;
   margin-bottom: 1.25rem;
 }
 .filter-button {
@@ -134,8 +135,8 @@ a:hover { color: var(--gold); }
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-width: 7rem;
-  padding: 0.55rem 0.85rem;
+  min-width: 6.5rem;
+  padding: 0.4rem 0.7rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--card);
