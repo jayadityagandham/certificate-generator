@@ -1,0 +1,23 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Runtime data (created when the app runs)
+backend/storage/
+backend/instance/
+*.db
+*.db-wal
+*.db-shm
+
+# Node
+node_modules/
+dist/
+
+# Secrets and editor files
+.env
+.DS_Store
+.idea/
+.vscode/
