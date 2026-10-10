@@ -1,6 +1,4 @@
-// Sample recipients that deliberately include bad rows, so a reviewer can see
-// failed certificates being isolated from the good ones in one click.
-const lines = [
+const mixedLines = [
   "name,email",
   "Aarav Sharma,aarav@example.com",
   ",missing.name@example.com", // fails: name is required
@@ -12,4 +10,45 @@ const lines = [
   "Meera Patel,meera@example.com",
 ];
 
-export const SAMPLE_CSV = lines.join("\n");
+const validLines = [
+  "name,email",
+  "Asha Rao,asha@example.com",
+  "Rohan Mehta,rohan@example.com",
+  "Kavya Iyer,kavya@example.com",
+  "Neel Shah,neel@example.com",
+  "Sara Thomas,sara@example.com",
+];
+
+const failureLines = [
+  "name,email",
+  ",missing-name@example.com",
+  "Invalid Email,not-an-email",
+  "Another Invalid Email,missing-at.example.com",
+  "Valid Recipient,valid@example.com",
+];
+
+export const SAMPLE_DATASETS = [
+  {
+    id: "mixed",
+    label: "Mixed valid and invalid rows",
+    eventName: "Introduction to Machine Learning",
+    issuerName: "Tech Club",
+    csv: mixedLines.join("\n"),
+  },
+  {
+    id: "valid",
+    label: "All valid recipients",
+    eventName: "Frontend Development Workshop",
+    issuerName: "Engineering Academy",
+    csv: validLines.join("\n"),
+  },
+  {
+    id: "failures",
+    label: "Failure handling demo",
+    eventName: "Data Quality Review",
+    issuerName: "Training Team",
+    csv: failureLines.join("\n"),
+  },
+];
+
+export const SAMPLE_CSV = SAMPLE_DATASETS[0].csv;

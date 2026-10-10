@@ -80,6 +80,18 @@ a:hover { color: var(--gold); }
   color: var(--ink);
 }
 .form textarea { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9rem; resize: vertical; }
+.sample-picker { max-width: 28rem; }
+.sample-picker select {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #b9c0cc;
+  border-radius: 6px;
+  font: inherit;
+  background: #fff;
+  color: var(--ink);
+}
 .file-label { font-weight: 400 !important; margin-bottom: 0 !important; }
 .file-label input { display: block; margin-top: 0.35rem; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }

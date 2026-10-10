@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
 import { createJob } from "../api";
-import { SAMPLE_CSV } from "../sampleData";
+import { SAMPLE_DATASETS } from "../sampleData";
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -29,6 +29,7 @@ export default function SubmitPage() {
   const [csvText, setCsvText] = useState("");
   const [errors, setErrors] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedSample, setSelectedSample] = useState("");
 
   const recipientCount = parseRecipients(csvText).length;
 
@@ -39,10 +40,13 @@ export default function SubmitPage() {
     }
   }
 
-  function loadSample() {
-    setEventName("Introduction to Machine Learning");
-    setIssuerName("Tech Club");
-    setCsvText(SAMPLE_CSV);
+  function loadSample(sampleId) {
+    const sample = SAMPLE_DATASETS.find((item) => item.id === sampleId);
+    if (!sample) return;
+    setSelectedSample(sample.id);
+    setEventName(sample.eventName);
+    setIssuerName(sample.issuerName);
+    setCsvText(sample.csv);
     setErrors([]);
   }
 
@@ -106,6 +110,24 @@ export default function SubmitPage() {
           />
         </label>
 
+        <div className="sample-picker">
+          <label>
+            Load sample data
+            <select
+              value={selectedSample}
+              onChange={(e) => loadSample(e.target.value)}
+              disabled={submitting}
+            >
+              <option value="">Choose a sample dataset</option>
+              {SAMPLE_DATASETS.map((sample) => (
+                <option key={sample.id} value={sample.id}>
+                  {sample.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         <div className="row row-between">
           <label className="file-label">
             Or upload a .csv file
@@ -130,9 +152,6 @@ export default function SubmitPage() {
         <div className="actions">
           <button type="submit" className="btn btn-primary" disabled={submitting}>
             {submitting ? "Submitting..." : "Generate certificates"}
-          </button>
-          <button type="button" className="btn" onClick={loadSample} disabled={submitting}>
-            Load sample data
           </button>
         </div>
       </form>
