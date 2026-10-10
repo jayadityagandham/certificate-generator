@@ -151,8 +151,8 @@ a:hover { color: var(--gold); }
 }
 .filter-button strong { font-size: 1.1rem; }
 
-.table-wrap { padding: 0; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
+.table-wrap { padding: 0; overflow: hidden; }
+table { width: 100%; table-layout: fixed; border-collapse: collapse; }
 th, td { text-align: left; padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font-size: 0.9rem; color: var(--ink-soft); font-weight: 600; background: #fafbfc; }
 .table-header th {
@@ -162,6 +162,12 @@ th { font-size: 0.9rem; color: var(--ink-soft); font-weight: 600; background: #f
   font-weight: 700;
 }
 tbody tr:last-child td { border-bottom: none; }
+.recipient-cell {
+  width: 34%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+td { overflow-wrap: anywhere; }
 .error-text { color: var(--bad); }
 .row-actions { display: flex; gap: 1rem; }
 
@@ -178,6 +184,8 @@ tbody tr:last-child td { border-bottom: none; }
   .row { grid-template-columns: 1fr; }
   .row-between { flex-direction: column; align-items: flex-start; }
   .job-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  th, td { padding: 0.6rem 0.55rem; font-size: 0.9rem; }
+  .row-actions { flex-direction: column; gap: 0.4rem; }
   h1 { font-size: 1.5rem; }
 }
 

@@ -5,12 +5,19 @@ import ProgressBar from "../components/ProgressBar";
 import StatusBadge from "../components/StatusBadge";
 
 const POLL_INTERVAL_MS = 2000;
+const CERTIFICATE_FILTERS = [
+  { key: "all", label: "Total", count: (job) => job.total },
+  { key: "DONE", label: "Succeeded", count: (job) => job.done },
+  { key: "FAILED", label: "Failed", count: (job) => job.failed },
+  { key: "PENDING", label: "Pending", count: (job) => job.pending },
+];
 
 export default function JobDetailPage() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [certificates, setCertificates] = useState([]);
   const [error, setError] = useState("");
+  const [certificateFilter, setCertificateFilter] = useState("all");
 
   // Polling: ask the server for fresh numbers every 2 seconds until nothing is
   // pending, then stop. The cleanup function stops the timer when the page is left.
@@ -53,6 +60,11 @@ export default function JobDetailPage() {
   if (error && job === null) return <div className="alert alert-error">{error}</div>;
   if (job === null) return <p className="muted">Loading job...</p>;
 
+  const filteredCertificates =
+    certificateFilter === "all"
+      ? certificates
+      : certificates.filter((certificate) => certificate.status === certificateFilter);
+
   return (
     <>
       <p className="crumb">
@@ -73,11 +85,21 @@ export default function JobDetailPage() {
 
       <div className="card">
         <ProgressBar total={job.total} done={job.done} failed={job.failed} />
-        <div className="stats">
-          <span>{job.total} total</span>
-          <span className="stat-done">{job.done} done</span>
-          <span className="stat-failed">{job.failed} failed</span>
-          <span className="stat-pending">{job.pending} pending</span>
+        <div className="job-filters" aria-label="Filter certificates">
+          {CERTIFICATE_FILTERS.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className={
+                "filter-button" + (certificateFilter === item.key ? " active" : "")
+              }
+              aria-pressed={certificateFilter === item.key}
+              onClick={() => setCertificateFilter(item.key)}
+            >
+              <span>{item.label}</span>
+              <strong>{item.count(job)}</strong>
+            </button>
+          ))}
         </div>
         <div className="actions">
           {job.done > 0 ? (
@@ -101,9 +123,9 @@ export default function JobDetailPage() {
             </tr>
           </thead>
           <tbody>
-            {certificates.map((cert) => (
+            {filteredCertificates.map((cert) => (
               <tr key={cert.id}>
-                <td>
+                <td className="recipient-cell">
                   <div>{cert.recipient_name || <em className="muted">(no name)</em>}</div>
                   <div className="muted small">{cert.recipient_email}</div>
                 </td>
