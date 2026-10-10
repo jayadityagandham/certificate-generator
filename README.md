@@ -9,21 +9,25 @@ carries a QR code that opens a public verification page.
 - **Progress tracking:** the job status shows how many certificates are pending, done and failed, with the reason for each failure.
 - **Verifiable certificates:** every PDF has a QR code linking to `/verify/<token>`, which confirms the certificate is genuine.
 
-## Screenshots
-
-_Add after running the app locally (see the walkthrough below):_
-
-| New batch | Progress with failures | Verify page |
-|---|---|---|
-| `docs/screenshot-submit.png` | `docs/screenshot-progress.png` | `docs/screenshot-verify.png` |
-
 A sample output is in [`docs/sample-certificate.pdf`](docs/sample-certificate.pdf).
+
+## Assignment requirements
+
+| Requirement | Implementation |
+|---|---|
+| Accept a bulk certificate-generation request | `POST /api/jobs` accepts up to 1000 recipients |
+| Validate recipient data | Request-level validation rejects invalid jobs; recipient-level validation records individual failures |
+| Generate certificates from one predefined template | ReportLab renders one PDF template for each valid recipient |
+| Isolate individual failures | Each certificate is processed in its own error boundary, so one failure does not stop the job |
+| Track progress and results | `GET /api/jobs/{job_id}` returns pending, completed, failed, and failure details |
+| Retrieve generated certificates | Individual PDF and completed-certificates ZIP download endpoints |
+| Test important behavior | 41 pytest tests cover creation, validation, generation, progress, failure isolation, and retrieval |
 
 ## Tech stack
 
 | Part | Choice |
 |---|---|
-| Backend | Python 3.11+, Flask, Flask-SQLAlchemy |
+| Backend | Python 3.12+, Flask, Flask-SQLAlchemy |
 | Database | SQLite (relational, zero setup) |
 | PDF and QR | ReportLab, `qrcode` + Pillow |
 | Background work | `concurrent.futures.ThreadPoolExecutor` |
@@ -51,21 +55,34 @@ docs/sample-certificate.pdf
 EXPLAIN.md                   request flow and "where do I change X" table
 ```
 
-## Quick start
+## Setup
 
-You need Python 3.11+ and Node 18+. Use two terminals.
+You need Python 3.12+ and Node 18+. Use two terminals. The pinned SQLAlchemy version
+requires Python 3.12 in the supplied dependency set.
 
-**Terminal 1: backend (http://localhost:5000)**
+### 1. Install and run the backend
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # Windows PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python run.py
 ```
 
-**Terminal 2: frontend (http://localhost:5173)**
+The backend starts at http://localhost:5000. Check it with:
+
+```bash
+curl http://localhost:5000/health
+```
+
+Expected response:
+
+```json
+{ "status": "ok" }
+```
+
+### 2. Install and run the frontend
 
 ```bash
 cd frontend
@@ -73,46 +90,48 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173.
+Open http://localhost:5173. The frontend can also be opened at
+http://127.0.0.1:5173; both local origins are allowed by default.
 
 ### Configuration (all optional)
 
 | Variable | Default | Meaning |
 |---|---|---|
 | `BASE_URL` | `http://localhost:5173` | The **frontend** address. QR codes encode `{BASE_URL}/verify/<token>`. |
-| `CORS_ORIGINS` | `http://localhost:5173` | Comma-separated origins allowed to call the API. |
+| `CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Comma-separated origins allowed to call the API. |
 | `STORAGE_DIR` | `backend/storage` | Where PDFs are written. |
 | `FLASK_DEBUG` | off | Set to `1` for debug mode. The reloader stays off on purpose (see Design decisions). |
 | `VITE_API_URL` | `http://localhost:5000` | Frontend setting: where the API lives (`frontend/.env`). |
 
-## Run the tests
+## Run tests
 
 ```bash
 cd backend
-source .venv/bin/activate
 python -m pytest
 ```
+
+On Windows PowerShell, activate the environment first with
+`.venv\Scripts\Activate.ps1`, or run `.venv\Scripts\python.exe -m pytest`.
 
 The tests use a temporary database and storage folder per test, and turn on the `SYNC_PROCESSING`
 config flag so jobs run inline instead of in a background thread. That flag exists **only for
 tests**, to make them deterministic. Real use leaves it off.
 
-## 2-minute reviewer walkthrough
+## Submit a certificate-generation request
 
-1. Open http://localhost:5173 and click **Load sample data**. It fills in 8 recipients including bad rows: an empty name, an invalid email, a 150-character name, a duplicate, and a very long valid name.
-2. Click **Generate certificates**. You land on the job page, where the progress bar and counts update every 2 seconds.
-3. When it finishes, you should see 5 done and 3 failed. Each failed row shows its reason, and the good certificates were still produced.
-4. Click **Download** on a row, or **Download all as ZIP**. Open a PDF: the long name has shrunk to fit.
-5. Click **Verify** on a row to see the verification page (the QR code opens the same page).
-6. Open **Jobs** to see the job list with counts.
+### Using the frontend
 
-## API
+1. Open http://localhost:5173.
+2. Enter the event name, issue date, and issuer name.
+3. Paste CSV data with a `name,email` header, or upload a CSV file.
+4. Click **Generate certificates**.
+5. The job page polls for progress and displays successful and failed rows.
 
-All endpoints return JSON except the downloads. Trailing slashes are optional.
+Use **Load sample data** to demonstrate failure isolation with valid and invalid recipients.
 
-### Submit a job
+### Using the API
 
-`POST /api/jobs` returns `202 Accepted`
+The API accepts JSON and returns `202 Accepted` immediately with a job id:
 
 ```bash
 curl -X POST http://localhost:5000/api/jobs \
@@ -138,7 +157,7 @@ Invalid requests (empty list, more than 1000 recipients, missing fields, bad dat
 { "error": "Invalid request", "details": ["recipients must not be empty"] }
 ```
 
-### Check progress
+## Check job progress and results
 
 `GET /api/jobs/{job_id}`
 
@@ -161,12 +180,12 @@ curl http://localhost:5000/api/jobs/1
 
 Job status is **derived** from the certificate rows: `PROCESSING` while anything is pending, `COMPLETED` when all succeeded, `COMPLETED_WITH_ERRORS` otherwise.
 
-### List jobs and certificates
+List recent jobs and certificates:
 
 - `GET /api/jobs` returns the 50 most recent jobs, newest first.
 - `GET /api/jobs/{job_id}/certificates` returns `[{id, recipient_name, recipient_email, status, error, verification_token}]`.
 
-### Retrieve certificates
+## Retrieve generated certificates
 
 ```bash
 curl -OJ http://localhost:5000/api/certificates/1/download   # one PDF
@@ -175,7 +194,7 @@ curl -OJ http://localhost:5000/api/jobs/1/download           # ZIP of all finish
 
 A certificate that is not `DONE` returns `404`. The ZIP returns `404` if nothing has finished yet.
 
-### Verify a certificate
+## Verify a certificate
 
 `GET /api/verify/{token}`
 
@@ -186,9 +205,23 @@ A certificate that is not `DONE` returns `404`. The ZIP returns `404` if nothing
 
 Unknown tokens and failed certificates return `404` with `{ "valid": false }`.
 
-### Health
+The React frontend exposes the same verification result at `/verify/{token}`. Each generated PDF
+contains a QR code linking to that page.
 
-`GET /health` returns `{ "status": "ok" }`.
+## API reference
+
+All endpoints return JSON except the download endpoints. Trailing slashes are optional.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/health` | Service health check |
+| `POST` | `/api/jobs` | Create a bulk generation job |
+| `GET` | `/api/jobs` | List recent jobs |
+| `GET` | `/api/jobs/{job_id}` | Get progress and failures |
+| `GET` | `/api/jobs/{job_id}/certificates` | List certificates in a job |
+| `GET` | `/api/certificates/{certificate_id}/download` | Download one PDF |
+| `GET` | `/api/jobs/{job_id}/download` | Download completed PDFs as ZIP |
+| `GET` | `/api/verify/{token}` | Verify a completed certificate |
 
 ## How it works
 

@@ -42,7 +42,10 @@ def create_app(test_config=None):
         STORAGE_DIR=os.environ.get("STORAGE_DIR", os.path.join(backend_dir, "storage")),
         # BASE_URL is the FRONTEND address: the QR code opens {BASE_URL}/verify/<token>
         BASE_URL=os.environ.get("BASE_URL", "http://localhost:5173").rstrip("/"),
-        CORS_ORIGINS=os.environ.get("CORS_ORIGINS", "http://localhost:5173"),
+        CORS_ORIGINS=os.environ.get(
+            "CORS_ORIGINS",
+            "http://localhost:5173,http://127.0.0.1:5173",
+        ),
         # Tests only: run jobs inline instead of in a background thread.
         SYNC_PROCESSING=False,
     )
