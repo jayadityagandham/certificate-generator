@@ -124,19 +124,20 @@ a:hover { color: var(--gold); }
 .stat-pending { color: var(--wait); }
 
 .job-filters {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin-bottom: 1.25rem;
 }
 .filter-button {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.8rem 1rem;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 7rem;
+  padding: 0.55rem 0.85rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--card);
   color: var(--ink);
   font: inherit;
@@ -149,7 +150,7 @@ a:hover { color: var(--gold); }
   background: var(--ink);
   color: #fff;
 }
-.filter-button strong { font-size: 1.1rem; }
+.filter-button strong { font-size: 1rem; }
 
 .table-wrap { padding: 0; overflow: hidden; }
 table { width: 100%; table-layout: fixed; border-collapse: collapse; }
@@ -167,6 +168,15 @@ tbody tr:last-child td { border-bottom: none; }
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+.id-cell {
+  width: 4.5rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.certificate-id {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
 td { overflow-wrap: anywhere; }
 .error-text { color: var(--bad); }
 .row-actions { display: flex; gap: 1rem; }
@@ -183,7 +193,7 @@ td { overflow-wrap: anywhere; }
 @media (max-width: 600px) {
   .row { grid-template-columns: 1fr; }
   .row-between { flex-direction: column; align-items: flex-start; }
-  .job-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filter-button { flex: 1 1 calc(50% - 0.3rem); min-width: 0; }
   th, td { padding: 0.6rem 0.55rem; font-size: 0.9rem; }
   .row-actions { flex-direction: column; gap: 0.4rem; }
   h1 { font-size: 1.5rem; }

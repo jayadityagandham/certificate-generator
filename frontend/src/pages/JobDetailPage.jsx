@@ -116,6 +116,7 @@ export default function JobDetailPage() {
         <table>
         <thead className="table-header">
             <tr>
+              <th className="id-cell">ID</th>
               <th>Recipient</th>
               <th>Status</th>
               <th>Details</th>
@@ -125,6 +126,9 @@ export default function JobDetailPage() {
           <tbody>
             {filteredCertificates.map((cert) => (
               <tr key={cert.id}>
+                <td className="id-cell">
+                  <span className="certificate-id">#{cert.id}</span>
+                </td>
                 <td className="recipient-cell">
                   <div>{cert.recipient_name || <em className="muted">(no name)</em>}</div>
                   <div className="muted small">{cert.recipient_email}</div>
