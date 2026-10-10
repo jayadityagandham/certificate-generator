@@ -92,7 +92,7 @@ export default function JobDetailPage() {
 
       <div className="card table-wrap">
         <table>
-          <thead>
+        <thead className="table-header">
             <tr>
               <th>Recipient</th>
               <th>Status</th>
